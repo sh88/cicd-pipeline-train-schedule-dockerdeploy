@@ -14,14 +14,14 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build("sh88/train-schedule")
+                    app = docker.build("harishsheshadri/train-schedule")
                     app.inside {
                         sh 'echo $(curl localhost:8080)'
                     }
                 }
             }
         }
-        stage('Push Docker Image') {
+        stage('Push Docker Image To Docker Hub') {
             when {
                 branch 'master'
             }
