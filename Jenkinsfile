@@ -14,14 +14,14 @@ pipeline {
             }
             steps {
                 script {
-                    app = docker.build("harishsheshadri/train-schedule")
+                    app = docker.build("sh88/train-schedule")
                     app.inside {
                         sh 'echo $(curl localhost:8080)'
                     }
                 }
             }
         }
-        stage('Push Docker Image To Docker Hub') {
+        stage('Push Docker Image') {
             when {
                 branch 'master'
             }
@@ -43,16 +43,14 @@ pipeline {
                 milestone(1)
                 withCredentials([usernamePassword(credentialsId: 'webserver_login', usernameVariable: 'USERNAME', passwordVariable: 'USERPASS')]) {
                     script {
-                        sh "echo '$USERPASS'"
-                        sh "echo '$USERNAME'"
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull harishsheshadri/train-schedule:${env.BUILD_NUMBER}\""
+                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker pull willbla/train-schedule:${env.BUILD_NUMBER}\""
                         try {
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker stop train-schedule\""
                             sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker rm train-schedule\""
                         } catch (err) {
                             echo: 'caught error: $err'
                         }
-                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker run --restart always --name train-schedule -p 8080:8080 -d harishsheshadri/train-schedule:${env.BUILD_NUMBER}\""
+                        sh "sshpass -p '$USERPASS' -v ssh -o StrictHostKeyChecking=no $USERNAME@$prod_ip \"docker run --restart always --name train-schedule -p 8080:8080 -d sh88/train-schedule:${env.BUILD_NUMBER}\""
                     }
                 }
             }
